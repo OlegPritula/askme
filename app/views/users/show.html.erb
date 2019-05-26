@@ -21,7 +21,7 @@
 
   <h2 class="title-medium">
     <%# Выводим количество вопросов заданных пользователю %>
-  <%= @questions.size %> <%= sklonenie(@questions.size, "вопрос", "вопроса", "вопросов")%>
+    <%= @questions.size %> <%= counter_questions(@questions.size, "вопрос", "вопроса", "вопросов")%>
   </h2>
 
   <div class="user-ask-button container text-center">

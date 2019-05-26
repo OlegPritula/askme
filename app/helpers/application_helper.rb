@@ -11,41 +11,11 @@ module ApplicationHelper
     end
   end
 
-  def sklonenie(number, krokodil, krokodila, krokodilov)
-    # Сначала, проверим входные данные на правильность
-    if number == nil || !number.is_a?(Numeric)
-      # Допустим, первый параметр пустой или не является числом (строка). Будем
-      # считать, что нас это устроит, просто продолжаем как будто он нулевой.
-      number = 0
-    end
-
-    if number >= 11 && number <= 14
-      return krokodilov
-    end
-    # Исправление ошибки 112 негритят вместо 112 негритенка
-    if number > 100
-      ostatok = number % 100
-      if ostatok >= 11 && ostatok <= 14
-        return krokodilov
-      end
-    end
-
-    ostatok = number % 10
-
-    # Для 1 — именительный падеж (Кто?/Что? — крокодил)
-    if ostatok == 1
-      return krokodil
-    end
-
-    # Для 2-4 — родительный падеж (2 Кого?/Чего? — крокодилов)
-    if ostatok >= 2 && ostatok <= 4
-      return krokodila
-    end
-
-    # 5-9 или ноль — родительный падеж и множественное число (8 Кого?/Чего? —
-    # крокодилов)
-    if (ostatok >= 5 && ostatok <= 9) || ostatok == 0
-      return krokodilov
+  def counter_questions(number, vopros, voprosa, voprosov)
+    if (number % 100).between?(10,14) || (number % 10).between?(5,9) || (number % 10) == 0
+      voprosov
+    else
+      (number % 10) == 1 ? vopros : voprosa
     end
   end
 end
