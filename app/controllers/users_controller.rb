@@ -5,58 +5,77 @@
 #   3. Позволять пользователю редактировать свою страницу
 #
 class UsersController < ApplicationController
+  # Загружаем юзера из базы для экшенов кроме :index, :create, :new
+  before_action :load_user, except: [:index, :create, :new]
+
+  # Проверяем имеет ли юзер доступ к экшену, делаем это для всех действий, кроме
+  # :index, :new, :create, :show — к этим действиям есть доступ у всех, даже у
+  # тех, у кого вообще нет аккаунта на нашем сайте.
+  before_action :authorize_user, except: [:index, :new, :create, :show]
+
   # Это действие отзывается, когда пользователь заходит по адресу /users
   def index
-    # Мы создаем массив из двух болванок пользователей. Для создания фейковой
-    # модели мы просто вызываем метод User.new, который создает модель, не
-    # записывая её в базу.
-    @users = [
-      User.new(
-        id: 1,
-        name: 'Vadim',
-        username: 'installero',
-        avatar_url: 'https://secure.gravatar.com/avatar/' \
-          '71269686e0f757ddb4f73614f43ae445?s=100'
-      ),
-      User.new(id: 2, name: 'Misha', username: 'aristofun')
-    ]
+    @users = User.all
+  end
+  # Действие new будет отзываться по адресу /users/new
+  def new
+    # Если пользователь уже авторизован, ему не нужна новая учетная запись,
+    # отправляем его на главную с сообщением.
+    redirect_to root_url, alert: 'Вы уже залогинены' if current_user.present?
+
+    @user = User.new
   end
 
-  def new
+  def create
+    # Если пользователь уже авторизован, ему не нужна новая учетная запись,
+    # отправляем его на главную с сообщением.
+    redirect_to root_url, alert: 'Вы уже залогинены' if current_user.present?
+
+    @user = User.new(user_params)
+    if @user.save
+      redirect_to root_url, notice: 'Пользователь успешно зарегистрирован!'
+    else
+      render 'new'
+    end
   end
 
   def edit
   end
 
-  # Это действие отзывается, когда пользователь заходит по адресу /users/:id,
-  # например /users/1.
   def show
-    # Болванка пользователя
-    @user = User.new(
-      name: 'Vadim',
-      username: 'installero',
-      avatar_url: 'https://secure.gravatar.com/avatar/' \
-        '71269686e0f757ddb4f73614f43ae445?s=100'
-    )
+    # берём вопросы у найденного юзера
+    @questions = @user.questions.order(created_at: :desc)
 
-    # Болванка вопросов для пользователя
-    @questions = [
-      Question.new(text: 'Как дела?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Какая погода?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Как все успевать?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Где мое время?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Как так можно?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Куда смотреть?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Кому выгодно?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Что это?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Как дела?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'Как дела?', created_at: Date.parse('27.05.2019')),
-      Question.new(text: 'В чем смысл жизни?', created_at: Date.parse('27.05.2019'))
-    ]
-
-    # Болванка для нового вопроса
-    @new_question = Question.new
-
-    # Обратите внимание, пока ни одна из болванок не достается из базы
+    # Для формы нового вопроса создаём заготовку, вызывая build у результата вызова метода @user.questions.
+    @new_question = @user.questions.build
   end
+
+  def update
+  # пытаемся обновить юзера
+  if @user.update(user_params)
+    # Если получилось, отправляем пользователя на его страницу с сообщением
+    redirect_to user_path(@user), notice: 'Данные обновлены'
+  else
+    # Если не получилось, как и в create, рисуем страницу редактирования
+    # пользователя со списком ошибок
+    render 'edit'
+  end
+end
+
+private
+
+  def user_params
+    params.require(:user).permit(:email, :password, :password_confirmation,
+                                 :name, :username, :avatar_url)
+  end
+
+  # Загружаем из базы запрошенного юзера, находя его по params[:id].
+  def load_user
+    @user ||= User.find params[:id]
+  end
+
+  def authorize_user
+    reject_user unless @user == current_user
+  end
+
 end
