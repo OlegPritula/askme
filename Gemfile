@@ -1,12 +1,12 @@
-# (с) goodprogrammer.ru
-#
-# Файл, сгенерированный рельсами при создании нового приложения удалены все
-# лишние гемы, будем добавлять вручную по мере необходимости.
+﻿source 'https://rubygems.org'
 
-source 'https://rubygems.org'
-
-gem 'rails', '~> 4.2.8'
+gem 'rails', '~> 4.2.10'
 gem 'jquery-rails'
+
+group :production do
+  gem 'pg', '~> 0.21'
+  gem 'rails_12factor', '0.0.2'
+end
 
 group :development, :test do
   gem 'byebug'
