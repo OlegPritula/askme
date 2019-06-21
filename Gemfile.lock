@@ -122,7 +122,7 @@ DEPENDENCIES
   jquery-rails
   pg (~> 0.21)
   rails (~> 4.2.10)
-  rails_12factor (= 0.0.2)
+  rails_12factor
   sqlite3
   web-console (~> 2.0)
 
